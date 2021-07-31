@@ -1,7 +1,13 @@
 const searchBtn = document.getElementById('button-search');
+const searchInput = document.querySelector('.input-search');
 
-searchBtn.addEventListener('click', function () {
-   fetch(`http://www.omdbapi.com/?apikey=b999d022&s=${document.querySelector('.input-search').value}`)
+searchBtn.addEventListener('click', getMovie());
+searchInput.addEventListener('keyup', (e) => {
+   if (e.key === 'Enter') { getMovie() }
+});
+
+function getMovie() {
+   fetch(`http://www.omdbapi.com/?apikey=b999d022&s=${searchInput.value}`)
       .then(response => response.json())
       .then(response => {
          const movies = response.Search;
@@ -22,9 +28,7 @@ searchBtn.addEventListener('click', function () {
             })
          })
       })
-})
-
-
+}
 
 
 function showMovie({ Title, Year, Poster, imdbID }) {
