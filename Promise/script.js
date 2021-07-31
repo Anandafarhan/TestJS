@@ -5,6 +5,7 @@ searchBtn.addEventListener('click', function () {
       .then(response => response.json())
       .then(response => {
          const movies = response.Search;
+         document.querySelector('.movie-list').innerHTML = ``;
          for (const m of movies) {
             document.querySelector('.movie-list').insertAdjacentHTML('beforeend', showMovie(m))
          }
