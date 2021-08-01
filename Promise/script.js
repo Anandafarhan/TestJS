@@ -1,38 +1,98 @@
-const searchBtn = document.getElementById('btn-search');
+const searchBtn = document.querySelector('.btn-search');
 const searchInput = document.querySelector('.input-search');
 
-searchBtn.addEventListener('click', () => getMovie());
-searchInput.addEventListener('keyup', (e) => {
-   if (e.key === 'Enter') getMovie()
+
+searchInput.addEventListener('keyup', async (e) => {
+   if (e.key === 'Enter') {
+      try {
+         const movies = await getMovie()
+         updateUI(movies)
+      }
+      catch (err) {
+         document.querySelector('.movie-list').innerHTML = showError(err);
+      }
+
+   }
 });
 
+
+document.addEventListener('click', async (e) => {
+   if (e.target.classList.contains('btn-search')) {
+      try {
+         const movies = await getMovie()
+         updateUI(movies)
+      } catch (err) {
+         document.querySelector('.movie-list').innerHTML = showError(err);
+      }
+
+   }
+   if (e.target.classList.contains('btn-movie-detail')) {
+      try {
+         document.querySelector('.modal-body').innerHTML = ``;
+         const imdbid = e.target.dataset.imdbid;
+         const movieDetail = await getMovieDetail(imdbid)
+         updateMovieDetailUI(movieDetail)
+      } catch (err) {
+         document.querySelector('.modal-body').innerHTML = showError(err);
+      }
+
+   }
+})
+
+
+
 function getMovie() {
-   fetch(`https://www.omdbapi.com/?apikey=b999d022&s=${searchInput.value}`)
-      .then(response => response.json())
+   return fetch(`https://www.omdbapi.com/?apikey=b999d022&s=${searchInput.value}`)
       .then(response => {
-         const movies = response.Search;
-         document.querySelector('.movie-list').innerHTML = ``;
-         for (const m of movies) {
-            document.querySelector('.movie-list').insertAdjacentHTML('beforeend', showMovie(m))
+         if (!response.ok) {
+            throw new Error(response.statusText);
          }
+         return response.json()
       })
-      .then(function () {
-         const btnDetail = document.querySelectorAll('.btn-movie-detail');
-         btnDetail.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-               fetch(`https://www.omdbapi.com/?apikey=b999d022&i=${this.dataset.imdbid}`)
-                  .then(response => response.json())
-                  .then(response => {
-                     document.querySelector('.modal-body').innerHTML = showMovieDetail(response);
-                  })
-            })
-         })
+      .then(response => {
+         if (response.Response === 'False') {
+            throw new Error(response.Error);
+         }
+         return response.Search
       })
 }
 
 
-function showMovie({ Title, Year, Poster, imdbID }) {
-   return `<div class="col-md-4 my-3" loading="lazy">
+function getMovieDetail(imdbid) {
+   return fetch(`https://www.omdbapi.com/?apikey=b999d022&i=${imdbid}`)
+      .then(response => {
+         if (!response.ok) {
+            throw new Error(response.statusText);
+         }
+         return response.json()
+      })
+      .then(response => {
+         if (response.Response === 'False') {
+            throw new Error(response.Error);
+         }
+         return response
+      })
+}
+
+
+function updateUI(data) {
+   if (data != undefined) {
+      const movies = data;
+      document.querySelector('.movie-list').innerHTML = ``;
+      for (const m of movies) {
+         document.querySelector('.movie-list').insertAdjacentHTML('beforeend', createCard(m))
+      }
+   }
+}
+
+
+function updateMovieDetailUI(data) {
+   document.querySelector('.modal-body').innerHTML = createMovieDetail(data)
+}
+
+
+function createCard({ Title, Year, Poster, imdbID }) {
+   return `<div class="col-md-3 my-3" loading="lazy">
                <div class="card">
                   <img src="${Poster}" class="card-img-top lozad">
                   <div class="card-body">
@@ -45,7 +105,7 @@ function showMovie({ Title, Year, Poster, imdbID }) {
 }
 
 
-function showMovieDetail({ Title, Year, Genre, Director, Writer, Actors, Plot, Poster }) {
+function createMovieDetail({ Title, Year, Genre, Director, Writer, Actors, Plot, Poster }) {
    return `<div class="container-fluid">
                <div class="row">
                <div class="col-md-3">
@@ -65,4 +125,11 @@ function showMovieDetail({ Title, Year, Genre, Director, Writer, Actors, Plot, P
                </div>
                </div>
             </div>`;
+}
+
+
+function showError(err) {
+   return `<div class="alert alert-danger" role="alert">
+               ${err}
+            </div>`
 }
