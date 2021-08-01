@@ -1,13 +1,13 @@
-const searchBtn = document.getElementById('button-search');
+const searchBtn = document.getElementById('btn-search');
 const searchInput = document.querySelector('.input-search');
 
-searchBtn.addEventListener('click', getMovie());
+searchBtn.addEventListener('click', () => getMovie());
 searchInput.addEventListener('keyup', (e) => {
-   if (e.key === 'Enter') { getMovie() }
+   if (e.key === 'Enter') getMovie()
 });
 
 function getMovie() {
-   fetch(`http://www.omdbapi.com/?apikey=b999d022&s=${searchInput.value}`)
+   fetch(`https://www.omdbapi.com/?apikey=b999d022&s=${searchInput.value}`)
       .then(response => response.json())
       .then(response => {
          const movies = response.Search;
@@ -20,7 +20,7 @@ function getMovie() {
          const btnDetail = document.querySelectorAll('.btn-movie-detail');
          btnDetail.forEach(function (btn) {
             btn.addEventListener('click', function () {
-               fetch(`http://www.omdbapi.com/?apikey=b999d022&i=${this.dataset.imdbid}`)
+               fetch(`https://www.omdbapi.com/?apikey=b999d022&i=${this.dataset.imdbid}`)
                   .then(response => response.json())
                   .then(response => {
                      document.querySelector('.modal-body').innerHTML = showMovieDetail(response);

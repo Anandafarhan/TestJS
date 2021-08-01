@@ -1,6 +1,14 @@
 $('#button-search').on('click', function () {
+   getMovie()
+})
+
+$('.input-search').keypress(function (e) {
+   if (e.key === 'Enter') getMovie()
+})
+
+function getMovie() {
    $.ajax({
-      url: `http://www.omdbapi.com/?apikey=b999d022&s=${$('.input-search').val()}`,
+      url: `https://www.omdbapi.com/?apikey=b999d022&s=${$('.input-search').val()}`,
       success: result => {
          const movies = result.Search;
          let cards = "";
@@ -11,7 +19,7 @@ $('#button-search').on('click', function () {
 
          $('.btn-movie-detail').on('click', function () {
             $.ajax({
-               url: `http://www.omdbapi.com/?apikey=b999d022&i=${$(this).data('imdbid')}`,
+               url: `https://www.omdbapi.com/?apikey=b999d022&i=${$(this).data('imdbid')}`,
                success: result => {
                   modalContent = showMovieDetail(result);
                   $('.modal-body').html(modalContent);
@@ -26,7 +34,7 @@ $('#button-search').on('click', function () {
          console.error(e.responseText);
       }
    });
-})
+}
 
 function showMovie({ Title, Year, Poster, imdbID }) {
    return `<div class="col-md-4 my-3" loading="lazy">
